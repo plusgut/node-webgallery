@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 var express = require('express');
+var async   = require('async');
+
 var fs = require('fs');
 var app = express();
 app.use(express.static(__dirname + '/public'));
@@ -17,13 +19,27 @@ app.get('/pics', function(req, res){
       res.send(500);
     } else{
        var newFiles = [];
-       for(var fileIndex in files){
-         if(files.hasOwnProperty(fileIndex) && files[fileIndex][0] != '.'){
-           var gallerie = {title: files[fileIndex], picture: '/blarg.jpg'};
-           newFiles.push(gallerie);
+       async.forEach(files, function(file, cb){
+         if(file[0] != '.'){ 
+          fs.readdir(path + '/' + file, function(err, pictures){
+             if(err){
+               cbb(err);
+             } else{
+               var gallerie = {title: file, picture: 'pics/' + file + '/' + pictures[0]};
+               newFiles.push(gallerie);
+               cb();
+             }
+           });
+         } else{
+           cb();
          }
-       }
-       res.end(JSON.stringify(newFiles));
+       }, function(err){
+         if(err){
+           res.send(500);
+         } else{
+           res.end(JSON.stringify(newFiles));
+         }
+       })
     }
   });
 })

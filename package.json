@@ -11,6 +11,7 @@
         "node": "0.6.x"
     },
     "dependencies": {
-        "express":"*"
+       "express":"*",
+       "async": "*"
    }
 }
