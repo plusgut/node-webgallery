@@ -1,8 +1,6 @@
-gnah
-{{#if controller.galleriesLoaded}}
-  {{#each gallerie in controller.galleries}}
-    <li>{gallerie.title}}</li>    
-  {{/each}} 
-
-  Loading..
-{{/if}}
+{{#each gallerie in controller.galleries}}
+  <p>
+   {{gallerie.title}}
+    <img {{bindAttr src="gallery.picture"}}>
+  </p>   
+{{/each}} 

@@ -19,7 +19,7 @@ app.get('/pics', function(req, res){
        var newFiles = [];
        for(var fileIndex in files){
          if(files.hasOwnProperty(fileIndex) && files[fileIndex][0] != '.'){
-           var gallerie = {title: files[fileIndex]};
+           var gallerie = {title: files[fileIndex], picture: '/blarg.jpg'};
            newFiles.push(gallerie);
          }
        }
