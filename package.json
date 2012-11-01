@@ -1,0 +1,16 @@
+{
+    "name": "node-webgallery",
+    "version": "0.0.1",
+        "engines": {
+        "node": "0.8.x",
+        "npm":  "1.1.x"
+    },
+    "author": "cjeske@webentwickler2-0.de",
+    "private": false,
+    "engines": {
+        "node": "0.6.x"
+    },
+    "dependencies": {
+        "express":"*"
+   }
+}
