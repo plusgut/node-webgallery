@@ -3,6 +3,5 @@ App.views.index = Em.View.create({
   init: function(){
     this.controller.loadHandlebar('index')
   },
-
 }).appendTo('#application');
 
