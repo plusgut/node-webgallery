@@ -8,7 +8,8 @@ App.controllers.Index = Em.ObjectController.extend({
       self.set('galleriesLoaded', true);
       var parsedContent = self.serialize(JSON.parse(content));
       parsedContent.forEach(function(gallery){
-        Em.defineProperty(gallery, 'path', App.helpers.index.path())
+        Em.defineProperty(gallery, 'path', App.helpers.index.path());
+        Em.defineProperty(gallery, 'thumb', App.helpers.index.path());
       });
       self.set('galleries', parsedContent);
     });
