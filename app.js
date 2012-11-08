@@ -25,7 +25,7 @@ app.get('/pics', function(req, res){
              if(err){
                cbb(err);
              } else{
-               var gallerie = {title: file, picture: 'pics/' + file + '/' + pictures[0]};
+               var gallerie = {title: file, picture: pictures[0]};
                newFiles.push(gallerie);
                cb();
              }
