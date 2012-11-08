@@ -1,6 +1,14 @@
-{{#each gallerie in controller.galleries}}
-  <p>
-   {{gallerie.title}}
-    <img {{bindAttr src="gallerie.thumb"}}">
-  </p>   
-{{/each}} 
+<div class="row-fluid">
+  <ul class="thumbnails">
+    {{#each gallerie in controller.galleries}}
+      <li span="3">
+        <div class="thumbnail">
+          <img {{bindAttr src="gallerie.thumb"}}">
+          <div class="caption" style="text-align: center">
+            {{gallerie.title}}
+          </div>
+        </div>
+      </li>
+    {{/each}}
+  </ul>
+</div>
