@@ -6,5 +6,15 @@ App.views.index = Em.View.create({
       self.set('template', Em.Handlebars.compile(content));
     });
   },
+  enterGallery: function(obj){
+    var gal = "";
+    if(obj.target.id){
+      gal = obj.target.id;
+    } else{
+       gal = obj.target.parentNode.id;
+    }
+
+    location.hash = gal;
+  },
 }).appendTo('#application');
 

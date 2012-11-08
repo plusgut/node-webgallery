@@ -27,7 +27,11 @@ App.controllers.Index = Em.ObjectController.extend({
         newContent.pushObject(emContent);
       }
     }
-
     return newContent;
-  }
+  },
+  hashChanged: function(hash){
+    console.log('index: ' + hash);
+  },
+  active: true
 });
+

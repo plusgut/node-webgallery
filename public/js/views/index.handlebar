@@ -2,7 +2,7 @@
   <ul class="thumbnails">
     {{#each gallerie in controller.galleries}}
       <li span="3">
-        <div class="thumbnail">
+        <div class="thumbnail" {{action enterGallery}} {{bindAttr id="gallerie.title"}}>
           <img {{bindAttr src="gallerie.thumb"}}">
           <div class="caption" style="text-align: center">
             {{gallerie.title}}
@@ -12,3 +12,4 @@
     {{/each}}
   </ul>
 </div>
+
