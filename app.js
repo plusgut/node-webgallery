@@ -59,7 +59,13 @@ app.get('/pics/:galleryName', function(req, res){
           log(err);
           res.send(500);
         } else{
-          res.end(JSON.stringify(files));
+          var result = [];
+          async.forEach(files, function(file, cb){
+            result.push({picture: file, comments: [{foo: "bar"}], title: file});
+            cb();
+          }, function(){
+            res.end(JSON.stringify(result));
+          });
         }
       })
     } else{
