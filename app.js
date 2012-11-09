@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 var express = require('express');
 var async   = require('async');
-var Canvas  = require('canvas');
+var im      = require('imagemagick');
 var fs      = require('fs');
 
 var app   = express();
-var Image = Canvas.Image;
 var debug = true;
 
 app.use(express.static(__dirname + '/public'));
@@ -96,38 +95,31 @@ app.get('/thumbs/:galleryName/:width/:height/:pictureName', function(req, res){
       var pathOrig = __dirname + '/pics/' + req.params.galleryName + '/' + req.params.pictureName;
       fs.exists(pathOrig, function(originalExists){//Checks if there is an original
         if(originalExists){
-          var img = new Image;
+          mkdir(path, function(err){
+            if(err){
+              log(err);
+              res.send(500);
+            } else{
+              var width  = parseFloat(req.params.width);
+              var height = parseFloat(req.params.height);
 
-          img.onerror = function(err){
-            log(err);
-            res.send(500);
-          };
-
-          img.onload = function(){
-            var width  = parseFloat(req.params.width);
-            var height = parseFloat(req.params.height);
-
-            var canvas = new Canvas(width, height);
-            var ctx    = canvas.getContext('2d');
-
-            ctx.drawImage(img, 0, 0, width, height);
-            canvas.toBuffer(function(err, buf){
-              mkdir(path, function(){
-                fs.writeFile(path, buf, function(err){
-                  if(err){
-                    log(err);
-                    res.send(500)
-                  } else{
-                    res.sendfile(path);
-                  }
-                });
+              im.resize({
+                srcPath: pathOrig,
+                dstPath: path,
+                width:   width,
+                height:  height
+              }, function(err, stdout, stderr){
+                if(err){
+                  log(err);
+                  res.send(500);
+                } else{
+                  res.sendfile(path);
+                }            
               });
-            });
-          };
-
-          img.src = pathOrig;
+            }
+          })
         } else{
-          res.send(404);
+            res.send(404);
         }
       });
     }
