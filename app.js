@@ -6,6 +6,7 @@ var fs      = require('fs');
 
 var app   = express();
 var Image = Canvas.Image;
+var debug = true;
 
 app.use(express.static(__dirname + '/public'));
 
@@ -19,6 +20,7 @@ app.get('/pics', function(req, res){
   var path = __dirname + '/pics';
   fs.readdir(path, function(err, files){
     if(err){
+      log(err);
       res.send(500);
     } else{
        var newFiles = [];
@@ -38,6 +40,7 @@ app.get('/pics', function(req, res){
          }
        }, function(err){
          if(err){
+           log(err);
            res.send(500);
          } else{
            res.end(JSON.stringify(newFiles));
@@ -53,6 +56,7 @@ app.get('/pics/:galleryName', function(req, res){
     if(exists){
       fs.readdir(path, function(err, files){
         if(err){
+          log(err);
           res.send(500);
         } else{
           res.end(JSON.stringify(files));
@@ -89,6 +93,7 @@ app.get('/thumbs/:galleryName/:width/:height/:pictureName', function(req, res){
           var img = new Image;
 
           img.onerror = function(err){
+            log(err);
             res.send(500);
           };
 
@@ -104,6 +109,7 @@ app.get('/thumbs/:galleryName/:width/:height/:pictureName', function(req, res){
               mkdir(path, function(){
                 fs.writeFile(path, buf, function(err){
                   if(err){
+                    log(err);
                     res.send(500)
                   } else{
                     res.sendfile(path);
@@ -142,5 +148,11 @@ function mkdir(path, cb, position){
         });
       }
     });
+  }
+}
+
+function log(message){
+  if(debug){
+    console.log(message);
   }
 }
