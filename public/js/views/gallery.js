@@ -1,4 +1,3 @@
-App.views.gallery = Em.View.create({
-  controller: App.controllers.Gallery.create(),
+App.views.Gallery = Em.View.extend({
   visible: false
 });

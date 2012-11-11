@@ -1,10 +1,6 @@
-App.views.index = Em.View.create({
-  controller: App.controllers.Index.create(),
+App.views.Index = Em.View.extend({
   init: function(){
     var self = this;
-    this.controller.loadHandlebar('index', function(content){
-      self.set('template', Em.Handlebars.compile(content));
-    });
   },
   enterGallery: function(obj){
     var gal = "";
@@ -16,5 +12,4 @@ App.views.index = Em.View.create({
 
     location.hash = gal;
   },
-}).appendTo('#application');
-
+})

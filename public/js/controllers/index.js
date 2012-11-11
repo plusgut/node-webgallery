@@ -6,17 +6,15 @@ App.controllers.Index = Em.ObjectController.extend({
     var self = this;
     $.ajax('/pics').done(function(content){
       self.set('galleriesLoaded', true);
-      var parsedContent = self.serialize(JSON.parse(content));
-      parsedContent.forEach(function(gallery){
-        Em.defineProperty(gallery, 'path', App.helpers.index.path());
-        Em.defineProperty(gallery, 'thumb', App.helpers.index.path());
-      });
-      self.set('galleries', parsedContent);
-    });
-  },
-  loadHandlebar: function(name, cb) {
-    $.ajax('/js/views/' + name + '.handlebar').done(function(content){
-      cb(content);
+//      var parsedContent = self.serialize(JSON.parse(content));
+//      parsedContent.forEach(function(gallery){
+
+//        Em.defineProperty(gallery, 'path', App.helpers.index.path());
+//        Em.defineProperty(gallery, 'thumb', App.helpers.index.path());
+//      });
+//      self.set('galleries', parsedContent);
+        var tete = [{foo: 'bar'}];
+        App.controllers.index.get('galleries').pushObject({foo: 'bar'});
     });
   },
   serialize: function(content){

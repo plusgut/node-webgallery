@@ -13,6 +13,7 @@
     "dependencies": {
        "express":"*",
        "async": "*",
-       "imagemagick": "*"
+       "imagemagick": "*",
+       "ember-handlebars-precompiler": "*"
    }
 }
