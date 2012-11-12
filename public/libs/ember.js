@@ -1,5 +1,5 @@
-// Version: v1.0.0-pre.2
-// Last commit: b851567 (2012-10-25 12:56:33 -0700)
+// Version: v1.0.0-pre.2-28-gb35fcaa
+// Last commit: b35fcaa (2012-11-10 09:25:25 -1000)
 
 
 (function() {
@@ -140,8 +140,8 @@ window.ember_deprecateFunc  = Ember.deprecateFunc("ember_deprecateFunc is deprec
 
 })();
 
-// Version: v1.0.0-pre.2
-// Last commit: b851567 (2012-10-25 12:56:33 -0700)
+// Version: v1.0.0-pre.2-28-gb35fcaa
+// Last commit: b35fcaa (2012-11-10 09:25:25 -1000)
 
 
 (function() {
@@ -4853,11 +4853,20 @@ function isMethod(obj) {
 }
 
 function mergeMixins(mixins, m, descs, values, base) {
-  var len = mixins.length, idx, mixin, guid, props, value, key, ovalue, concats;
+  var len = mixins.length, idx, mixin, guid, props, value, key, ovalue, concats, meta;
 
   function removeKeys(keyName) {
     delete descs[keyName];
     delete values[keyName];
+  }
+
+  function cloneDescriptor(desc) {
+    var newDesc = new Ember.ComputedProperty();
+    newDesc._cacheable = desc._cacheable;
+    newDesc._dependentKeys = desc._dependentKeys;
+    newDesc.func = desc.func;
+
+    return newDesc;
   }
 
   for(idx=0; idx < len; idx++) {
@@ -4874,6 +4883,8 @@ function mergeMixins(mixins, m, descs, values, base) {
     }
 
     if (props) {
+      meta = Ember.meta(base);
+
       // reset before adding each new mixin to pickup concats from previous
       concats = values.concatenatedProperties || base.concatenatedProperties;
       if (props.concatenatedProperties) {
@@ -4885,6 +4896,21 @@ function mergeMixins(mixins, m, descs, values, base) {
         value = props[key];
         if (value instanceof Ember.Descriptor) {
           if (value === REQUIRED && descs[key]) { continue; }
+
+          // Wrap descriptor function to implement
+          // _super() if needed
+          if (value.func) {
+            ovalue = values[key] === undefined && descs[key];
+            if (!ovalue) { ovalue = meta.descs[key]; }
+            if (ovalue && ovalue.func) {
+              // Since multiple mixins may inherit from the
+              // same parent, we need to clone the computed
+              // property so that other mixins do not receive
+              // the wrapped version.
+              value = cloneDescriptor(value);
+              value.func = Ember.wrap(value.func, ovalue.func);
+            }
+          }
 
           descs[key]  = value;
           values[key] = undefined;
@@ -5804,7 +5830,7 @@ Ember.none = function(obj) {
       Ember.empty(undefined);      => true
       Ember.empty('');             => true
       Ember.empty([]);             => true
-      Ember.empty('tobias fÃ¼nke'); => false
+      Ember.empty('tobias fünke'); => false
       Ember.empty([0,1,2]);        => false
 
   @method empty
@@ -7410,7 +7436,7 @@ Ember.Array = Ember.Mixin.create(Ember.Enumerable, /** @scope Ember.Array.protot
   /**
     This returns the objects at the specified indexes, using `objectAt`.
 
-        var arr =Â ['a', 'b', 'c', 'd'];
+        var arr = ['a', 'b', 'c', 'd'];
         arr.objectsAt([0, 1, 2]) => ["a", "b", "c"]
         arr.objectsAt([2, 3, 4]) => ["c", "d", undefined]
 
@@ -9985,7 +10011,7 @@ Ember.ArrayProxy = Ember.Object.extend(Ember.MutableArray,
     @return {void}
   */
   replaceContent: function(idx, amt, objects) {
-    get(this, 'arrangedContent').replace(idx, amt, objects);
+    get(this, 'content').replace(idx, amt, objects);
   },
 
   /**
@@ -10836,16 +10862,6 @@ Ember.SortableMixin = Ember.Mixin.create(Ember.MutableEnumerable, {
   sortProperties: null,
   sortAscending: true,
 
-  addObject: function(obj) {
-    var content = get(this, 'content');
-    content.pushObject(obj);
-  },
-
-  removeObject: function(obj) {
-    var content = get(this, 'content');
-    content.removeObject(obj);
-  },
-
   orderBy: function(item1, item2) {
     var result = 0,
         sortProperties = get(this, 'sortProperties'),
@@ -11562,7 +11578,7 @@ Ember.Application = Ember.Namespace.extend(
     @param router {Ember.Router}
   */
   initialize: function(router) {
-    Ember.assert("Application initialize may only be call once", !this.isInitialized);
+    Ember.assert("Application initialize may only be called once", !this.isInitialized);
     Ember.assert("Application not destroyed", !this.isDestroyed);
 
     router = this.setupRouter(router);
@@ -12467,9 +12483,10 @@ Ember.EventDispatcher = Ember.Object.extend(
 */
 
 // Add a new named queue for rendering views that happens
-// after bindings have synced.
+// after bindings have synced, and a queue for scheduling actions
+// that that should occur after view rendering.
 var queues = Ember.run.queues;
-queues.splice(Ember.$.inArray('actions', queues)+1, 0, 'render');
+queues.splice(Ember.$.inArray('actions', queues)+1, 0, 'render', 'afterRender');
 
 })();
 
@@ -13557,6 +13574,8 @@ Ember.View = Ember.CoreView.extend(
   templateForName: function(name, type) {
     if (!name) { return; }
 
+    Ember.assert("templateNames are not allowed to contain periods: "+name, name.indexOf('.') === -1);
+
     var templates = get(this, 'templates'),
         template = get(templates, name);
 
@@ -13974,10 +13993,6 @@ Ember.View = Ember.CoreView.extend(
         // Get the current value of the property
         newClass = this._classStringForProperty(binding);
         elem = this.$();
-        if (!elem) {
-          removeObserver(this, parsedPath.path, observer);
-          return;
-        }
 
         // If we had previously added a class to the element, remove it.
         if (oldClass) {
@@ -15485,7 +15500,7 @@ var childViewsProperty = Ember.computed(function() {
   aContainer = Ember.ContainerView.create({
     childViews: ['aView', 'bView', 'cView'],
     aView: Ember.View.create(),
-    bView: Ember.View.create()
+    bView: Ember.View.create(),
     cView: Ember.View.create()
   });
   ```
@@ -16021,8 +16036,24 @@ var get = Ember.get, set = Ember.set, fmt = Ember.String.fmt;
   ``` javascript
   Ember.CollectionView.CONTAINER_MAP['article'] = 'section'
   ```
-
-
+  ## Programatic creation of child views
+  For cases where additional customization beyond the use of a single `itemViewClass`
+  or `tagName` matching is required CollectionView's `createChildView` method can be
+  overidden:
+  
+  ``` javascript
+  CustomCollectionView = Ember.CollectionView.extend({
+    createChildView: function(viewClass, attrs) {
+      if (attrs.content.kind == 'album') {
+        viewClass = App.AlbumView;
+      } else {
+        viewClass = App.SongView;
+      }
+      this._super(viewClass, attrs);
+    }
+  });
+  ```
+  
   ## Empty View
   You can provide an `Ember.View` subclass to the `Ember.CollectionView` instance as its
   `emptyView` property. If the `content` property of a `CollectionView` is set to `null`
@@ -17613,16 +17644,33 @@ Ember.Routable = Ember.Mixin.create({
 
     @method absoluteRoute
     @param manager {Ember.StateManager}
-    @param hash {Hash}
+    @param hashes {Array}
   */
-  absoluteRoute: function(manager, hash) {
-    var parentState = get(this, 'parentState');
-    var path = '', generated;
+  absoluteRoute: function(manager, hashes) {
+    var parentState = get(this, 'parentState'),
+      path = '', 
+      generated,
+      currentHash;
+
+    // check if object passed instead of array
+    // in this case set currentHash = hashes 
+    // this allows hashes to be a single hash 
+    // (it will be applied to state and all parents)
+    currentHash = null;
+    if (hashes) {
+      if (hashes instanceof Array) {
+        if (hashes.length > 0) {
+          currentHash = hashes.shift();
+        }
+      } else {
+        currentHash = hashes;
+      }
+    }
 
     // If the parent state is routable, use its current path
     // as this route's prefix.
     if (get(parentState, 'isRoutable')) {
-      path = parentState.absoluteRoute(manager, hash);
+      path = parentState.absoluteRoute(manager, hashes);
     }
 
     var matcher = get(this, 'routeMatcher'),
@@ -17630,10 +17678,10 @@ Ember.Routable = Ember.Mixin.create({
 
     // merge the existing serialized object in with the passed
     // in hash.
-    hash = hash || {};
-    merge(hash, serialized);
+    currentHash = currentHash || {};
+    merge(currentHash, serialized);
 
-    generated = matcher && matcher.generate(hash);
+    generated = matcher && matcher.generate(currentHash);
 
     if (generated) {
       path = path + '/' + generated;
@@ -18985,7 +19033,7 @@ Ember.Router = Ember.StateManager.extend(
     }
   },
 
-  urlFor: function(path, hash) {
+  urlFor: function(path, hashes) {
     var currentState = get(this, 'currentState') || this,
         state = this.findStateByPath(currentState, path);
 
@@ -18993,36 +19041,42 @@ Ember.Router = Ember.StateManager.extend(
     Ember.assert(Ember.String.fmt("To get a URL for the state '%@', it must have a `route` property.", [path]), get(state, 'routeMatcher'));
 
     var location = get(this, 'location'),
-        absoluteRoute = state.absoluteRoute(this, hash);
+        absoluteRoute = state.absoluteRoute(this, hashes);
 
     return location.formatURL(absoluteRoute);
   },
 
   urlForEvent: function(eventName) {
-    var contexts = Array.prototype.slice.call(arguments, 1);
-    var currentState = get(this, 'currentState');
-    var targetStateName = currentState.lookupEventTransition(eventName);
+    var contexts = Array.prototype.slice.call(arguments, 1),
+      currentState = get(this, 'currentState'),
+      targetStateName = currentState.lookupEventTransition(eventName),
+      targetState,
+      hashes;
 
     Ember.assert(Ember.String.fmt("You must specify a target state for event '%@' in order to link to it in the current state '%@'.", [eventName, get(currentState, 'path')]), targetStateName);
 
-    var targetState = this.findStateByPath(currentState, targetStateName);
+    targetState = this.findStateByPath(currentState, targetStateName);
 
     Ember.assert("Your target state name " + targetStateName + " for event " + eventName + " did not resolve to a state", targetState);
 
-    var hash = this.serializeRecursively(targetState, contexts, {});
 
-    return this.urlFor(targetStateName, hash);
+    hashes = this.serializeRecursively(targetState, contexts, []);
+
+    return this.urlFor(targetStateName, hashes);
   },
 
-  serializeRecursively: function(state, contexts, hash) {
-    var parentState,
-        context = get(state, 'hasContext') ? contexts.pop() : null;
-    merge(hash, state.serialize(this, context));
-    parentState = state.get("parentState");
-    if (parentState && parentState instanceof Ember.Route) {
-      return this.serializeRecursively(parentState, contexts, hash);
+  serializeRecursively: function(state, contexts, hashes) {
+    var parentState, 
+			context = get(state, 'hasContext') ? contexts.pop() : null,
+      hash = context ? state.serialize(this, context) : null;
+
+		hashes.push(hash);
+		parentState = state.get("parentState");
+
+		if (parentState && parentState instanceof Ember.Route) {
+      return this.serializeRecursively(parentState, contexts, hashes);
     } else {
-      return hash;
+      return hashes;
     }
   },
 
@@ -19133,7 +19187,7 @@ Ember Routing
 (function() {
 // ==========================================================================
 // Project:   metamorph
-// Copyright: Â©2011 My Company Inc. All rights reserved.
+// Copyright: ©2011 My Company Inc. All rights reserved.
 // ==========================================================================
 
 (function(window) {
@@ -20399,7 +20453,7 @@ EmberHandlebars.registerHelper('bind', function(property, options) {
   @private
 
   Use the `boundIf` helper to create a conditional that re-evaluates
-  whenever the bound value changes.
+  whenever the truthiness of the bound value changes.
 
   ``` handlebars
   {{#boundIf "content.shouldDisplayTitle"}}
@@ -20473,6 +20527,8 @@ EmberHandlebars.registerHelper('with', function(context, options) {
 
 
 /**
+  See `boundIf`
+
   @method if
   @for Ember.Handlebars.helpers
   @param {Function} context
@@ -20509,8 +20565,108 @@ EmberHandlebars.registerHelper('unless', function(context, options) {
   `bindAttr` allows you to create a binding between DOM element attributes and
   Ember objects. For example:
 
+
   ``` handlebars
   <img {{bindAttr src="imageUrl" alt="imageTitle"}}>
+  ```
+
+  The above handlebars template will fill the `<img>`'s `src` attribute
+  will the value of the property referenced with `"imageUrl"` and its
+  `alt` attribute with the value of the property referenced with `"imageTitle"`.
+
+  If the rendering context of this template is the following object:
+
+  ``` javascript
+  {
+    imageUrl: 'http://lolcats.info/haz-a-funny',
+    imageTitle: 'A humorous image of a cat'
+  }
+  ```
+
+  The resulting HTML output will be:
+
+  ``` html
+    <img src="http://lolcats.info/haz-a-funny" alt="A humorous image of a cat">
+  ```
+
+  `bindAttr` cannot redeclare existing DOM element attributes. The use
+  of `src` in the following `bindAttr` example will be ignored and the hard coded value
+  of `src="/failwhale.gif"` will take precedence:
+
+  ``` handlebars
+  <img src="/failwhale.gif" {{bindAttr src="imageUrl" alt="imageTitle"}}>
+  ```
+
+  ### `bindAttr` and the `class` attribute
+  `bindAttr` supports a special syntax for handling a number of cases unique
+  to the `class` DOM element attribute. The `class` attribute combines
+  multiple discreet values into a single attribute as a space-delimited
+  list of strings. Each string can be
+
+    * a string return value of an object's property.
+    * a boolean return value of an object's property
+    * a hard-coded value
+
+  A string return value works identically to other uses of `bindAttr`. The return
+  value of the property will become the value of the attribute. For example,
+  the following view and template:
+
+  ``` javascript
+    AView = Ember.View.extend({
+      someProperty: function(){
+        return "aValue";
+      }.property()
+    })
+  ```
+
+  ``` handlebars
+  <img {{bindAttr class="view.someProperty}}>
+  ```
+
+  Result in the following rendered output:
+  <img class="aValue">
+
+  A boolean return value will insert a specified class name if the property
+  returns `true` and remove the class name if the property returns `false`.
+
+  A class name is provided via the syntax `somePropertyName:class-name-if-true`.
+
+  ``` javascript
+    AView = Ember.View.extend({
+      someBool: true
+    })
+  ```
+
+  ``` handlebars
+  <img {{bindAttr class="view.someBool:class-name-if-true"}}>
+  ```
+
+  Result in the following rendered output:
+  <img class="class-name-if-true">
+
+  An additional section of the binding can be provided if you want to
+  replace the existing class instead of removing it when the boolean
+  value changes:
+
+  ``` handlebars
+  <img {{bindAttr class="view.someBool:class-name-if-true:class-name-if-false"}}>
+  ```
+
+  A hard-coded value can be used by prepending `:` to the desired
+  class name: `:class-name-to-always-apply`.
+
+  ``` handlebars
+  <img {{bindAttr class=":class-name-to-always-apply"}}>
+  ```
+
+  Results in the following rendered output:
+  <img class=":class-name-to-always-apply">
+
+  All three strategies - string return value, boolean return value, and
+  hard-coded value – can be combined in a single declaration:
+
+  ```handlebars
+  <img {{bindAttr class=":class-name-to-always-apply view.someBool:class-name-if-true view.someProperty"}}>
   ```
 
   @method bindAttr
@@ -23147,8 +23303,8 @@ Ember Handlebars
 
 })();
 
-// Version: v1.0.0-pre.2
-// Last commit: b851567 (2012-10-25 12:56:33 -0700)
+// Version: v1.0.0-pre.2-28-gb35fcaa
+// Last commit: b35fcaa (2012-11-10 09:25:25 -1000)
 
 
 (function() {
