@@ -1,6 +1,9 @@
 App.controllers.container = Em.ObjectController.create({
+  view: Em.View.create({
+    template: Ember.Handlebars.compile('Loading.. ')
+  }),
   content: [],
-  createChildViews: function(viewCb){
+  init: function(){
     var views = [];
     for(var viewIndex in App.views){
       if(App.views.hasOwnProperty(viewIndex)){
@@ -13,21 +16,33 @@ App.controllers.container = Em.ObjectController.create({
 
     async.forEach(views, function(module, cb){
       var moduleInstance = module.toLowerCase();
-      if(!App.views[moduleInstance]){
+      if(!App.views[moduleInstance] && moduleInstance != 'container'){
         self.loadHandlebar(module, moduleInstance, function(module, moduleInstance, template){
           App.controllers[moduleInstance] = App.controllers[module].create();
           Em.TEMPLATES[moduleInstance] = Em.Handlebars.compile(template);
-          App.views[moduleInstance] = App.views[module].create({
+          App.views[module] = App.views[module].extend({
             controller: App.controllers[moduleInstance], 
-            templateName: moduleInstance});
-          childViews.push(App.views[moduleInstance]);
+            templateName: moduleInstance
+          });          
           cb();
         });
       } else{
         cb();
       }
     }, function(err){
-      viewCb(err, childViews);
+      var template = '';
+      for(var viewIndex in views){
+        if(views.hasOwnProperty(viewIndex)){
+          var view = views[viewIndex];
+          template += '{{view App.views.' + view + ' controller=App.controllers.' + view.toLowerCase() + '}}';
+        }
+      }
+
+console.log(template)
+      var container = Em.View.create({
+        template: Ember.Handlebars.compile(template)
+      });
+      self.set('view', container);
     });
   },
   loadHandlebar: function(module, moduleInstance, cb) {

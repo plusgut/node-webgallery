@@ -1,15 +1,20 @@
+foo
+{{#if controller.galleriesLoaded}}
+  if is working
+  {{log controller.galleriesLoaded}}
+
+{{/if}}
+
+{{#if controller.galleriesLoaded}}
+  yea it realy is
+  {{log controller.galleriesLoaded}}
+  {{#if controller.tete}}
+    okay thats perfect
+  {{/if}}
+{{/if}}
+
 <div class="row-fluid">
   <ul class="thumbnails">
-    {{#each gallerie in controller.galleries}}
-      <li span="3">
-        <div class="thumbnail" {{action enterGallery}} {{bindAttr id="gallerie.title"}}>
-          <img {{bindAttr src="gallerie.thumb"}}">
-          <div class="caption" style="text-align: center">
-            {{gallerie.title}}
-          </div>
-        </div>
-      </li>
-    {{/each}}
-  </ul>
+ </ul>
 </div>
 

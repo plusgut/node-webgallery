@@ -1,6 +1,7 @@
 App.controllers.Index = Em.ObjectController.extend({
   galleries: [],
   galleriesLoaded: false,
+  tete: true,
   init: function(){
     App.helpers.index = App.helpers.Index.create();
     var self = this;
