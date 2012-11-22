@@ -1,6 +1,7 @@
 App.views.Index = Em.View.extend({
   init: function(){
     var self = this;
+    this._super();
   },
   enterGallery: function(obj){
     var gal = "";

@@ -1,4 +1,4 @@
-App.controllers.Index = Em.ObjectController.extend({
+App.controllers.Index = Em.Controller.extend({
   galleries: [],
   galleriesLoaded: false,
   tete: true,
@@ -15,6 +15,7 @@ App.controllers.Index = Em.ObjectController.extend({
       });
       self.set('galleries', parsedContent);
     });
+    this._super();
   },
   serialize: function(content){
     var newContent = Em.A();
@@ -31,4 +32,6 @@ App.controllers.Index = Em.ObjectController.extend({
   },
   active: true
 });
+
+
 

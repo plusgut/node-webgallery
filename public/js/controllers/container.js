@@ -19,31 +19,20 @@ App.controllers.container = Em.ObjectController.create({
       if(!App.views[moduleInstance] && moduleInstance != 'container'){
         self.loadHandlebar(module, moduleInstance, function(module, moduleInstance, template){
           App.controllers[moduleInstance] = App.controllers[module].create();
-          Em.TEMPLATES[moduleInstance] = Em.Handlebars.compile(template);
-          App.views[module] = App.views[module].extend({
+
+          App.views[module] = App.views[module].create({
             controller: App.controllers[moduleInstance], 
-            templateName: moduleInstance
-          });          
+            template: Em.Handlebars.compile(template)
+          }).append();          
           cb();
         });
       } else{
         cb();
       }
     }, function(err){
-      var template = '';
-      for(var viewIndex in views){
-        if(views.hasOwnProperty(viewIndex)){
-          var view = views[viewIndex];
-          template += '{{view App.views.' + view + ' controller=App.controllers.' + view.toLowerCase() + '}}';
-        }
-      }
-
-console.log(template)
-      var container = Em.View.create({
-        template: Ember.Handlebars.compile(template)
-      });
-      self.set('view', container);
+      console.log('done');
     });
+    this._super();
   },
   loadHandlebar: function(module, moduleInstance, cb) {
     $.ajax('/js/views/' + moduleInstance + '.handlebar').done(function(content){
