@@ -1,8 +1,16 @@
 App.controllers.container = Em.ObjectController.create({
-  view: Em.View.create({
-    template: Ember.Handlebars.compile('Loading.. ')
-  }),
   content: [],
+  contentObserve: function(){
+    var content = this.get('content');
+    var template = '';
+    content.forEach(function(module){
+     template += '{{#if App.controllers.' + module.toLowerCase() + '.isVisible}}'; 
+     template += '{{view App.views.' + module + '}}';
+     template += '{{/if}}';
+    });
+    App.views.container.destroy();
+    App.views.container = App.views.Container.create({template: Em.Handlebars.compile(template)}).append();
+  }.observes('content.length'),
   init: function(){
     var views = [];
     for(var viewIndex in App.views){
@@ -11,7 +19,6 @@ App.controllers.container = Em.ObjectController.create({
       }
     }
 
-    var childViews = [];
     var self = this;
 
     async.forEach(views, function(module, cb){
@@ -22,10 +29,14 @@ App.controllers.container = Em.ObjectController.create({
             App.controllers[moduleInstance] = App.controllers[module].create();
           }
 
-          App.views[moduleInstance] = App.views[module].create({
+          App.views[module] = App.views[module].extend({
             controller: App.controllers[moduleInstance], 
             template: Em.Handlebars.compile(template)
-          }).append();          
+          })
+
+          if(module != 'container'){
+            self.get('content').pushObject(module);
+          }
           cb();
         });
       } else{

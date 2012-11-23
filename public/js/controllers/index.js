@@ -1,7 +1,7 @@
 App.controllers.Index = Em.Controller.extend({
   galleries: [],
   galleriesLoaded: false,
-  tete: true,
+  isVisible: true,
   init: function(){
     App.helpers.index = App.helpers.Index.create();
     var self = this;
@@ -28,7 +28,11 @@ App.controllers.Index = Em.Controller.extend({
     return newContent;
   },
   hashChanged: function(hash){
-    console.log('index: ' + hash);
+    if(hash == ''){
+      this.set('isVisible', true);
+    } else{
+      this.set('isVisible', false);
+    }
   },
   active: true
 });
