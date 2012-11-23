@@ -35,7 +35,7 @@ App.controllers.container = Em.ObjectController.create({
     this._super();
   },
   loadHandlebar: function(module, moduleInstance, cb) {
-    $.ajax('/js/views/' + moduleInstance + '.handlebar').done(function(content){
+    $.ajax('/js/views/' + moduleInstance + '.hjs').done(function(content){
       cb(module, moduleInstance, content);
     });
   }
