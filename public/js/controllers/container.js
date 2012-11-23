@@ -16,11 +16,13 @@ App.controllers.container = Em.ObjectController.create({
 
     async.forEach(views, function(module, cb){
       var moduleInstance = module.toLowerCase();
-      if(!App.views[moduleInstance] && moduleInstance != 'container'){
+      if(!App.views[moduleInstance]){
         self.loadHandlebar(module, moduleInstance, function(module, moduleInstance, template){
-          App.controllers[moduleInstance] = App.controllers[module].create();
+          if(!App.controllers[moduleInstance]){
+            App.controllers[moduleInstance] = App.controllers[module].create();
+          }
 
-          App.views[module] = App.views[module].create({
+          App.views[moduleInstance] = App.views[module].create({
             controller: App.controllers[moduleInstance], 
             template: Em.Handlebars.compile(template)
           }).append();          
