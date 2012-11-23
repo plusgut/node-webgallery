@@ -10,10 +10,10 @@ App.helpers     = {};
 
 $(window).bind( 'hashchange', function(e) {
   var hash = window.location.hash.substr(1);
-  for( var viewIndex in App.views ){
-    if(App.views.hasOwnProperty(viewIndex) && App.views[viewIndex].isInstance){
-      if(App.views[viewIndex].controller.hashChanged){
-        App.views[viewIndex].controller.hashChanged(hash);
+  for( var controllerIndex in App.controllers ){
+    if(App.controllers.hasOwnProperty(controllerIndex) && App.controllers[controllerIndex].isInstance){
+      if(App.controllers[controllerIndex].hashChanged){
+        App.controllers[controllerIndex].hashChanged(hash);
       }
     }
   }
