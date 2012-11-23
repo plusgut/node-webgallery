@@ -1,3 +1,1 @@
-App.views.Gallery = Em.View.extend({
-  visible: false
-});
+App.views.Gallery = Em.View.extend({});
