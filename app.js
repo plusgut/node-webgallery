@@ -29,7 +29,7 @@ app.get('/pics', function(req, res){
              if(err){
                cbb(err);
              } else{
-               var gallerie = {title: file, picture: pictures[0]};
+               var gallerie = {gallery: file, picture: pictures[0]};
                newFiles.push(gallerie);
                cb();
              }
@@ -60,7 +60,7 @@ app.get('/pics/:galleryName', function(req, res){
         } else{
           var result = [];
           async.forEach(files, function(file, cb){
-            result.push({picture: file, comments: [{foo: "bar"}], title: file});
+            result.push({gallery: req.params.galleryName, picture: file, comments: [{foo: "bar"}], title: file});
             cb();
           }, function(){
             res.end(JSON.stringify(result));
