@@ -1,14 +1,29 @@
 Em.LOG_BINDINGS = true;
 
-var App = Em.Application.create({
+var App = Em.Application.create(Em.Evented, {
+  init: function(){
+    this.on('finished', this, 'finished');
+    this._super();
+  },
   hashChanged: function(){
     var hash = window.location.hash.substr(1);
-    for( var controllerIndex in App.controllers ){
-      if(App.controllers.hasOwnProperty(controllerIndex) && App.controllers[controllerIndex].isInstance){
-        if(App.controllers[controllerIndex].hashChanged){
-          App.controllers[controllerIndex].hashChanged(hash);
-        }
+    if(hash){
+      var parts = hash.split('/');
+      if(parts.length == 1 ){
+        App.trigger('hidePicture');
+        App.trigger('hideIndex');
+        App.trigger('showGallery', parts[0]);
+      } else if(parts.length == 2){
+        App.trigger('hideGallery');
+        App.trigger('hideIndex');
+        App.trigger('showPicture', parts[0], parts[1]);
+      } else{
+        alert('404');
       }
+    } else {
+      App.trigger('hideGallery');
+      App.trigger('hidePicture');
+      App.trigger('showIndex');
     }
   },
   finished: function(){

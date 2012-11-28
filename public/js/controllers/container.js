@@ -43,7 +43,7 @@ App.controllers.container = Em.ObjectController.create({
         cb();
       }
     }, function(err){
-      App.finished(); 
+      App.trigger('finished'); 
     });
     this._super();
   },

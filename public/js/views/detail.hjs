@@ -1,0 +1,2 @@
+<a {{bindAttr href="controller.galleryUrl"}}>back</a>
+<img {{bindAttr src="controller.pictureUrl"}}>

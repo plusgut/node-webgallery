@@ -3,6 +3,8 @@ App.controllers.Index = Em.Controller.extend({
   galleriesLoaded: false,
   isVisible: true,
   init: function(){
+    App.on('showIndex', this, 'showIndex');
+    App.on('hideIndex', this, 'hideIndex');
     App.helpers.index = App.helpers.Index.create();
     var self = this;
     $.ajax('/pics').done(function(content){
@@ -27,15 +29,10 @@ App.controllers.Index = Em.Controller.extend({
     }
     return newContent;
   },
-  hashChanged: function(hash){
-    if(hash == ''){
-      this.set('isVisible', true);
-    } else{
-      this.set('isVisible', false);
-    }
+  showIndex: function(){
+    this.set('isVisible', true);
   },
-  active: true
+  hideIndex: function(){
+    this.set('isVisible', false);
+  }
 });
-
-
-

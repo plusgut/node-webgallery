@@ -5,7 +5,7 @@
   <ul class="thumbnails">
     {{#each picture in controller.pictures}}
       <li span="3">
-        <div class="thumbnail" {{action enterPicture}} {{bindAttr id="picture.title"}}>
+        <div class="thumbnail" {{action showPicture}} {{bindAttr id="picture.title"}}>
           <img {{bindAttr src="picture.thumb"}}">
           <div class="caption" style="text-align: center">
             {{picture.title}}

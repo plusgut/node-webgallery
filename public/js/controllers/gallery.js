@@ -1,4 +1,9 @@
 App.controllers.Gallery = Em.ObjectController.extend({
+  init: function(){
+    App.on('showGallery', this, 'showGallery');
+    App.on('hideGallery', this, 'hideGallery');
+    this._super();
+  },
   gallery: null,
   pictures: [],
   picturesLoaded: false,
@@ -7,7 +12,6 @@ App.controllers.Gallery = Em.ObjectController.extend({
     if(gallery){
       var self = this;
       $.ajax('/pics/' + gallery).done(function(content){
-console.log(content)
         self.set('picturesLoaded', true);
         var parsedContent = self.serialize(JSON.parse(content));
         parsedContent.forEach(function(picture){
@@ -29,12 +33,11 @@ console.log(content)
     return newContent;
   },
   isVisible: false,
-  hashChanged: function(hash){
-    this.set('gallery', hash);
-    if(hash){
-      this.set('isVisible', true);
-    } else{
-      this.set('isVisible', false);
-    }
+  showGallery: function(gallery){
+    this.set('gallery', gallery);
+    this.set('isVisible', true);
+  },
+  hideGallery: function(){
+    this.set('isVisible', false);
   }
 });
